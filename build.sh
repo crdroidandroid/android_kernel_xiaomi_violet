@@ -1,91 +1,192 @@
 #!/bin/bash
+#
+# Script For Building Android arm64 Kernel
+#
+# Copyright (C) 2021-2022 shashank1439 <9945shashank@gmail.com>
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 
-kernel_dir="${PWD}"
-CCACHE=$(command -v ccache)
-objdir="${kernel_dir}/out"
-anykernel=$HOME/anykernel
-builddir="${kernel_dir}/build"
-ZIMAGE=$kernel_dir/out/arch/arm64/boot/Image.gz-dtb
-kernel_name="xcalibur-violet"
-zip_name="$kernel_name-$(date +"%d%m%Y-%H%M").zip"
-TC_DIR=$HOME/tc/
-CLANG_DIR=$TC_DIR/clang-r458507
-export CONFIG_FILE="vendor/violet-perf_defconfig"
-export ARCH="arm64"
-export KBUILD_BUILD_HOST=SuperiorOS
-export KBUILD_BUILD_USER=Joker-V2
+# Setup colour for the script
+yellow='\033[0;33m'
+white='\033[0m'
+red='\033[0;31m'
+green='\e[0;32m'
 
-export PATH="$CLANG_DIR/bin:$PATH"
+# Deleting out "kernel complied" and zip "anykernel" from an old compilation
+echo -e "$green << cleanup >> \n $white"
 
-if ! [ -d "$TC_DIR" ]; then
-    echo "Toolchain not found! Cloning to $TC_DIR..."
-    if ! git clone -q --depth=1 --single-branch https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86 -b master $TC_DIR; then
-        echo "Cloning failed! Aborting..."
-        exit 1
-    fi
-fi
+rm -rf out
+rm -rf zip
+rm -rf error.log
 
-# Colors
-NC='\033[0m'
-RED='\033[0;31m'
-LRD='\033[1;31m'
-LGR='\033[1;32m'
+echo -e "$green << setup dirs >> \n $white"
 
-make_defconfig()
-{
-    START=$(date +"%s")
-    echo -e ${LGR} "########### Generating Defconfig ############${NC}"
-    make -s ARCH=${ARCH} O=${objdir} ${CONFIG_FILE} -j$(nproc --all)
+# With that setup , the script will set dirs and few important thinks
+
+MY_DIR="${BASH_SOURCE%/*}"
+if [[ ! -d "$MY_DIR" ]]; then MY_DIR="$PWD"; fi
+
+# Now u can chose which things need to be modified
+# CHATID = chatid of a telegram group/channel
+# API_BOT = api bot of a telegram bot
+#
+# DEVICE = your device codename
+# KERNEL_NAME = the name of ur kranul
+#
+# DEFCONFIG = defconfig that will be used to compile the kernel
+#
+# AnyKernel = the url of your modified anykernel script
+# AnyKernelbranch = the branch of your modified anykernel script
+#
+# HOSST = build host
+# USEER = build user
+#
+
+CHATID="-1001549474907"
+API_BOT="5788023007:AAFq51pdnj_9e4qMHc4jt1NPErjZBPeyXQk"
+
+DEVICE="REDMI NOTE 7 PRO"
+KERNEL_NAME="HYPER_KERNEL"
+CODENAME="VIOLET"
+
+# Kernel build release tag
+KRNL_REL_TAG="v1.0"
+
+DEFCONFIG="vendor/violet-perf_defconfig"
+
+AnyKernel="https://github.com/NRanjan-17/AnyKernel3"
+AnyKernelbranch="master"
+
+HOSST="HyperPower"
+USEER="17"
+
+# setup telegram env
+export BOT_MSG_URL="https://api.telegram.org/bot$API_BOT/sendMessage"
+export BOT_BUILD_URL="https://api.telegram.org/bot$API_BOT/sendDocument"
+
+tg_post_msg() {
+        curl -s -X POST "$BOT_MSG_URL" -d chat_id="$2" \
+        -d "parse_mode=html" \
+        -d text="$1"
 }
-compile()
-{
-    cd ${kernel_dir}
-    echo -e ${LGR} "######### Compiling kernel #########${NC}"
-    make -j$(nproc --all) \
-    O=out \
-    ARCH=${ARCH}\
-    CC="ccache clang" \
-    CLANG_TRIPLE="aarch64-linux-gnu-" \
-    CROSS_COMPILE="aarch64-linux-gnu-" \
-    CROSS_COMPILE_ARM32="arm-linux-gnueabi-" \
-    LLVM=1 \
-    LLVM_IAS=1
+
+tg_post_build() {
+        #Post MD5Checksum alongwith for easeness
+        MD5CHECK=$(md5sum "$1" | cut -d' ' -f1)
+
+        #Show the Checksum alongwith caption
+        curl --progress-bar -F document=@"$1" "$BOT_BUILD_URL" \
+        -F chat_id="$2" \
+        -F "disable_web_page_preview=true" \
+        -F "parse_mode=html" \
+        -F caption="$3 build finished in $(($Diff / 60)) minutes and $(($Diff % 60)) seconds | <b>MD5 Checksum : </b><code>$MD5CHECK</code>"
 }
 
-completion()
-{
-    cd ${objdir}
-    COMPILED_IMAGE=arch/arm64/boot/Image.gz-dtb
-    COMPILED_DTBO=arch/arm64/boot/dtbo.img
-    if [[ -f ${COMPILED_IMAGE} && ${COMPILED_DTBO} ]]; then
-
-        git clone -q https://github.com/Joker-V2/AnyKernel3 $anykernel
-
-        mv -f $ZIMAGE ${COMPILED_DTBO} $anykernel
-
-        cd $anykernel
-        find . -name "*.zip" -type f
-        find . -name "*.zip" -type f -delete
-        zip -r AnyKernel.zip *
-        mv AnyKernel.zip $zip_name
-        mv $anykernel/$zip_name $HOME/$zip_name
-        rm -rf $anykernel
-        END=$(date +"%s")
-        DIFF=$(($END - $START))
-        curl --upload-file $HOME/$zip_name https://free.keep.sh; echo
-        rm $HOME/$zip_name
-        echo -e ${LGR} "############################################"
-        echo -e ${LGR} "############# OkThisIsEpic!  ##############"
-        echo -e ${LGR} "############################################${NC}"
-        exit 0
-    else
-        echo -e ${RED} "############################################"
-        echo -e ${RED} "##         This Is Not Epic :'(           ##"
-        echo -e ${RED} "############################################${NC}"
-        exit 1
-    fi
+tg_error() {
+        curl --progress-bar -F document=@"$1" "$BOT_BUILD_URL" \
+        -F chat_id="$2" \
+        -F "disable_web_page_preview=true" \
+        -F "parse_mode=html" \
+        -F caption="$3Failed to build , check <code>error.log</code>"
 }
-make_defconfig
-compile
-completion
-cd ${kernel_dir}
+
+# clang stuff
+		echo -e "$green << cloning clang >> \n $white"
+		git clone --depth=1 https://gitlab.com/Amritorock/clang-r450784d.git "$HOME"/clang
+
+	export PATH="$HOME/clang/bin:$PATH"
+	export KBUILD_COMPILER_STRING=$("$HOME"/clang/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')
+
+# Setup build process
+
+build_kernel() {
+Start=$(date +"%s")
+
+	make -j$(nproc --all) O=out \
+                              ARCH=arm64 \
+                              LLVM=1 \
+                              LLVM_IAS=1 \
+                              AR=llvm-ar \
+                              NM=llvm-nm \
+                              LD=ld.lld \
+                              OBJCOPY=llvm-objcopy \
+                              OBJDUMP=llvm-objdump \
+                              STRIP=llvm-strip \
+                              CC=clang \
+                              CROSS_COMPILE=aarch64-linux-gnu- \
+                              CROSS_COMPILE_ARM32=arm-linux-gnueabi-  2>&1 | tee error.log
+
+End=$(date +"%s")
+Diff=$(($End - $Start))
+}
+
+# Let's start
+echo -e "$green << doing pre-compilation process >> \n $white"
+export ARCH=arm64
+export SUBARCH=arm64
+export HEADER_ARCH=arm64
+
+export KBUILD_BUILD_HOST="$HOSST"
+export KBUILD_BUILD_USER="$USEER"
+
+mkdir -p out
+
+make O=out clean && make O=out mrproper
+make "$DEFCONFIG" O=out
+
+echo -e "$yellow << compiling the kernel >> \n $white"
+tg_post_msg "Successful triggered Compiling kernel for $DEVICE $CODENAME" "$CHATID"
+
+build_kernel || error=true
+
+DATE=$(date +"%Y%m%d-%H%M%S")
+KERVER=$(make kernelversion)
+
+export IMG="$MY_DIR"/out/arch/arm64/boot/Image.gz-dtb
+export dtbo="$MY_DIR"/out/arch/arm64/boot/dtbo.img
+
+        if [ -f "$IMG" ]; then
+                echo -e "$green << Build completed in $(($Diff / 60)) minutes and $(($Diff % 60)) seconds >> \n $white"
+        else
+                echo -e "$red << Failed to compile the kernel , Check up to find the error >>$white"
+		tg_post_msg "Kernel failed to compile uploading error log"
+                tg_error "error.log" "$CHATID"
+                tg_post_msg "done" "$CHATID"
+                rm -rf out
+                rm -rf testing.log
+                rm -rf error.log
+                exit 1
+        fi
+
+        if [ -f "$IMG" ]; then
+                echo -e "$green << cloning AnyKernel from your repo >> \n $white"
+                git clone --depth=1 "$AnyKernel" --single-branch -b "$AnyKernelbranch" zip
+                echo -e "$yellow << making kernel zip >> \n $white"
+                cp -r "$IMG" zip/
+                cp -r "$dtbo" zip/
+                cd zip
+                export ZIP="$KERNEL_NAME"-"$KRNL_REL_TAG"-"$CODENAME"
+                zip -r9 "$ZIP" * -x .git README.md LICENSE *placeholder
+                curl -sLo zipsigner-3.0.jar https://gitlab.com/itsshashanksp/zipsigner/-/raw/master/bin/zipsigner-3.0-dexed.jar
+                java -jar zipsigner-3.0.jar "$ZIP".zip "$ZIP"-signed.zip
+		tg_post_msg "Kernel successfully compiled uploading ZIP" "$CHATID"
+                tg_post_build "$ZIP"-signed.zip "$CHATID"
+                tg_post_msg "done" "$CHATID"
+                cd ..
+                rm -rf error.log
+                rm -rf out
+                rm -rf zip
+                rm -rf testing.log
+                exit
+        fi
