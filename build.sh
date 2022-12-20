@@ -6,7 +6,7 @@ objdir="${kernel_dir}/out"
 anykernel=$HOME/anykernel
 builddir="${kernel_dir}/build"
 ZIMAGE=$kernel_dir/out/arch/arm64/boot/Image.gz-dtb
-kernel_name="hyper-violet"
+kernel_name="HYPER_KERNEL-v1.0_VIOLET"
 zip_name="$kernel_name-$(date +"%d%m%Y-%H%M").zip"
 TC_DIR=$HOME/tc/
 CLANG_DIR=$TC_DIR/clang-r458507
@@ -59,7 +59,7 @@ completion()
     COMPILED_DTBO=arch/arm64/boot/dtbo.img
     if [[ -f ${COMPILED_IMAGE} && ${COMPILED_DTBO} ]]; then
 
-        git clone -q https://github.com/Joker-V2/AnyKernel3 $anykernel
+        git clone -q https://github.com/NRanjan-17/AnyKernel3 $anykernel
 
         mv -f $ZIMAGE ${COMPILED_DTBO} $anykernel
 
