@@ -8843,7 +8843,7 @@ perf_event_parse_addr_filter(struct perf_event *event, char *fstr,
 				ret = kern_path(filename, LOOKUP_FOLLOW,
 						&filter->path);
 				if (ret)
-					goto fail_free_name;
+					goto fail;
 
 				kfree(filename);
 				filename = NULL;
