@@ -12,8 +12,8 @@ TC_DIR=$HOME/tc/
 CLANG_DIR=$TC_DIR/clang-r450784d
 export CONFIG_FILE="vendor/violet-perf_defconfig"
 export ARCH="arm64"
-export KBUILD_BUILD_HOST=HyperPower
-export KBUILD_BUILD_USER=17
+export KBUILD_BUILD_HOST=17
+export KBUILD_BUILD_USER=HyperPower
 
 export PATH="$CLANG_DIR/bin:$PATH"
 
