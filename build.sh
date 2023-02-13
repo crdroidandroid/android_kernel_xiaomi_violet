@@ -9,7 +9,7 @@ ZIMAGE=$kernel_dir/out/arch/arm64/boot/Image.gz-dtb
 kernel_name="HYPER_KERNEL-v1.1_VIOLET"
 zip_name="$kernel_name-$(date +"%d%m%Y-%H%M").zip"
 TC_DIR=$HOME/tc/
-CLANG_DIR=$TC_DIR/clang-r450784d
+CLANG_DIR=$TC_DIR/clang-r475365b
 export CONFIG_FILE="vendor/violet-perf_defconfig"
 export ARCH="arm64"
 export KBUILD_BUILD_HOST=17
@@ -19,7 +19,7 @@ export PATH="$CLANG_DIR/bin:$PATH"
 
 if ! [ -d "$TC_DIR" ]; then
     echo "Toolchain not found! Cloning to $TC_DIR..."
-    if ! git clone -q --depth=1 --single-branch https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86 -b android13-release $TC_DIR; then
+    if ! git clone -q --depth=1 --single-branch https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86 -b master $TC_DIR; then
         echo "Cloning failed! Aborting..."
         exit 1
     fi
