@@ -55,7 +55,7 @@ export KBUILD_BUILD_HOST=arch
 export KBUILD_BUILD_USER=kibria5
 export PATH="$CLANG_DIR/bin:$PATH"
 
-tg_post_msg "<b>Kernel : </b><code>$kernel_name</code>%0A<b>Kernel Version : </b><code>$KERVER</code>%0A<b>Machine : </b><code>$os</code>%0A<b>Cores : </b><code>$cores</code>%0A<b>Time : </b><code>$time</code>"
+tg_post_msg "<b>Kernel : </b><code>$kernel_name</code>%0A<b>Upstream Version : </b><code>$KERVER</code>%0A<b>Machine : </b><code>$os</code>%0A<b>Cores : </b><code>$cores</code>%0A<b>Time : </b><code>$time</code>"
 if ! [ -d "$TC_DIR" ]; then
     echo "Toolchain not found! Cloning to $TC_DIR..."
     tg_post_msg "<code>Toolchain not found! Cloning toolchain</code>"
