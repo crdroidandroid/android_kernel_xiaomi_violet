@@ -46,16 +46,17 @@ builddir="${kernel_dir}/build"
 ZIMAGE=$kernel_dir/out/arch/arm64/boot/Image.gz-dtb
 kernel_name="Evolution-X_violet"
 KERVER=$(make kernelversion)
+COMMIT_HEAD=$(git log --oneline -1)
 zip_name="$kernel_name-$(date +"%d%m%Y-%H%M").zip"
 TC_DIR=$HOME/tc/
 CLANG_DIR=$TC_DIR/clang-r487747
 export CONFIG_FILE="vendor/violet-perf_defconfig"
 export ARCH="arm64"
-export KBUILD_BUILD_HOST=arch
+export KBUILD_BUILD_HOST=Evolution-X
 export KBUILD_BUILD_USER=kibria5
 export PATH="$CLANG_DIR/bin:$PATH"
 
-tg_post_msg "<b>Kernel : </b><code>$kernel_name</code>%0A<b>Upstream Version : </b><code>$KERVER</code>%0A<b>Machine : </b><code>$os</code>%0A<b>Cores : </b><code>$cores</code>%0A<b>Time : </b><code>$time</code>"
+tg_post_msg "<b>Kernel : </b><code>$kernel_name</code>%0A<b>Upstream Version : </b><code>$KERVER</code>%0A<b>Machine : </b><code>$os</code>%0A<b>Cores : </b><code>$cores</code>%0A<b>Time : </b><code>$time</code>%0A<b>Top Commit : </b><code>$COMMIT_HEAD</code>"
 if ! [ -d "$TC_DIR" ]; then
     echo "Toolchain not found! Cloning to $TC_DIR..."
     tg_post_msg "<code>Toolchain not found! Cloning toolchain</code>"
