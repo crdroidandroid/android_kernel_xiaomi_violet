@@ -44,7 +44,7 @@ objdir="${kernel_dir}/out"
 anykernel=$HOME/anykernel
 builddir="${kernel_dir}/build"
 ZIMAGE=$kernel_dir/out/arch/arm64/boot/Image.gz-dtb
-kernel_name="Evolution-X_violet"
+kernel_name="perf_violet"
 KERVER=$(make kernelversion)
 COMMIT_HEAD=$(git log --oneline -1)
 zip_name="$kernel_name-$(date +"%d%m%Y-%H%M").zip"
@@ -52,7 +52,7 @@ TC_DIR=$HOME/tc/
 CLANG_DIR=$TC_DIR/clang-r487747c
 export CONFIG_FILE="vendor/violet-perf_defconfig"
 export ARCH="arm64"
-export KBUILD_BUILD_HOST=Evolution-X
+export KBUILD_BUILD_HOST=arch
 export KBUILD_BUILD_USER=kibria5
 export PATH="$CLANG_DIR/bin:$PATH"
 
