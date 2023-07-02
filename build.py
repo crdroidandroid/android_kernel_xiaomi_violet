@@ -54,6 +54,8 @@ export CONFIG_FILE="vendor/violet-perf_defconfig"
 export ARCH="arm64"
 export KBUILD_BUILD_HOST=arch
 export KBUILD_BUILD_USER=kibria5
+LINUX_COMPILE_BY="kibria5"
+LINUX_COMPILE_HOST="arch"
 export PATH="$CLANG_DIR/bin:$PATH"
 
 tg_post_msg "<b>Kernel : </b><code>$kernel_name</code>%0A<b>Upstream Version : </b><code>$KERVER</code>%0A<b>Machine : </b><code>$os</code>%0A<b>Cores : </b><code>$cores</code>%0A<b>Time : </b><code>$time</code>%0A<b>Top Commit : </b><code>$COMMIT_HEAD</code>"
