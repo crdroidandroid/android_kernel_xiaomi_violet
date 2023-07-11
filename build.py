@@ -57,8 +57,9 @@ export KBUILD_BUILD_USER=kibria5
 LINUX_COMPILE_BY="kibria5"
 LINUX_COMPILE_HOST="arch"
 export PATH="$CLANG_DIR/bin:$PATH"
+export CI_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 
-tg_post_msg "<b>Kernel : </b><code>$kernel_name</code>%0A<b>Upstream Version : </b><code>$KERVER</code>%0A<b>Machine : </b><code>$os</code>%0A<b>Cores : </b><code>$cores</code>%0A<b>Time : </b><code>$time</code>%0A<b>Top Commit : </b><code>$COMMIT_HEAD</code>"
+tg_post_msg "<b>Kernel : </b><code>$kernel_name</code>%0A<b>Upstream Version : </b><code>$KERVER</code>%0A<b>Machine : </b><code>$os</code>%0A<b>Cores : </b><code>$cores</code>%0A<b>Time : </b><code>$time</code>%0A<b>Branch : </b><code>$CI_BRANCH</code>%0A<b>Top Commit : </b><code>$COMMIT_HEAD</code>"
 if ! [ -d "$TC_DIR" ]; then
     echo "Toolchain not found! Cloning to $TC_DIR..."
     tg_post_msg "<code>Toolchain not found! Cloning toolchain</code>"
