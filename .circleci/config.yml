@@ -16,6 +16,7 @@ jobs:
           command: |
             sudo apt-get update
             sudo apt-get -y install mkisofs git python bc cpio
+            sudo apt-get -y install openjdk-11-jre-headless
 
       - run:
           name: Build kernel
