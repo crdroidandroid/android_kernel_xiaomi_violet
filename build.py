@@ -15,7 +15,7 @@ CHATID=$(/usr/bin/env python -c "import os; print(os.environ.get('CHATID'))")
 BOT_MSG_URL="https://api.telegram.org/bot${TOKEN}/sendMessage"
 BOT_BUILD_URL="https://api.telegram.org/bot${TOKEN}/sendDocument"
 # Build Machine details
-cores=$(nproc --all)
+cores=$(lscpu | grep "Core(s) per socket" | awk '{print $NF}')
 os=$(cat /etc/issue)
 time=$(TZ="Asia/Dhaka" date "+%a %b %d %r")
 # send saxx msgs to tg
@@ -47,7 +47,7 @@ ZIMAGE=$kernel_dir/out/arch/arm64/boot/Image.gz-dtb
 kernel_name="perf_violet"
 KERVER=$(make kernelversion)
 COMMIT_HEAD=$(git log --oneline -1)
-zip_name="$kernel_name-$(date +"%d%m%Y-%H%M").zip"
+zip_name="$kernel_name-$(date +"%d%m%Y-%H%M")-signed.zip"
 TC_DIR=$HOME/tc/
 CLANG_DIR=$TC_DIR/clang-r498229
 export CONFIG_FILE="vendor/violet-perf_defconfig"
@@ -114,15 +114,20 @@ completion() {
     find . -name "*.zip" -type f
     find . -name "*.zip" -type f -delete
     zip -r AnyKernel.zip *
-    mv AnyKernel.zip $zip_name
+    # Sign the ZIP file using zipsigner-3.0.jar
+    curl -sLo zipsigner-3.0.jar https://github.com/Magisk-Modules-Repo/zipsigner/raw/master/bin/zipsigner-3.0-dexed.jar
+    java -jar zipsigner-3.0.jar AnyKernel.zip AnyKernel-signed.zip
+    mv AnyKernel-signed.zip $zip_name
     mv $anykernel/$zip_name $HOME/$zip_name
     rm -rf $anykernel
     END=$(date +"%s")
     DIFF=$(($END - $START))
     BUILDTIME=$(echo $((${END} - ${START})) | awk '{print int ($1/3600)" Hours:"int(($1/60)%60)"Minutes:"int($1%60)" Seconds"}')
-    tg_post_build "$HOME/$zip_name" "Build took : $((DIFF / 60)) minute(s) and $((DIFF % 60)) second(s)"
-    tg_post_msg "<code>Compiled successfully</code>"
-    curl --upload-file $HOME/$zip_name https://free.keep.sh
+    file_path="$HOME/$zip_name"
+    url=$(curl --upload-file "$file_path" https://transfer.sh/"$zip_name")
+    zip_size=$(du -h $HOME/$zip_name | awk '{print $1}')
+    tg_post_msg "<b>$kernel_name compiled successfully</b>%0A<b>File Name:</b> <code>$zip_name</code>%0A<b>File Size:</b> <code>$zip_size</code>%0A<b>Download Link:</b> <a href='${url}'>Click Here</a>%0A<b>Build Time: $((DIFF / 60)) minute(s) and $((DIFF % 60)) second(s)</b>"
+
     echo
     echo -e ${LGR} "############################################"
     echo -e ${LGR} "############# OkThisIsEpic!  ##############"
