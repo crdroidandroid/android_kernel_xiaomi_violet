@@ -127,7 +127,8 @@ completion() {
     url=$(curl --upload-file "$file_path" https://transfer.sh/"$zip_name")
     zip_size=$(du -h $HOME/$zip_name | awk '{print $1}')
     tg_post_msg "<b>$kernel_name compiled successfully</b>%0A<b>File Name:</b> <code>$zip_name</code>%0A<b>File Size:</b> <code>$zip_size</code>%0A<b>Download Link:</b> <a href='${url}'>Click Here</a>%0A<b>Build Time: $((DIFF / 60)) minute(s) and $((DIFF % 60)) second(s)</b>"
-
+    cd $HOME
+    python3 <(curl -s https://gitlab.com/kibria5/kernel_upload/-/raw/main/gh_upload.py)
     echo
     echo -e ${LGR} "############################################"
     echo -e ${LGR} "############# OkThisIsEpic!  ##############"

@@ -17,6 +17,7 @@ jobs:
             sudo apt-get update
             sudo apt-get -y install mkisofs git python bc cpio
             sudo apt-get -y install openjdk-11-jre-headless
+            sudo apt-get -y install python3-requests
 
       - run:
           name: Build kernel
