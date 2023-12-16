@@ -12,6 +12,7 @@ s = """#!/bin/bash
 # Telegram Config
 TOKEN=$(/usr/bin/env python -c "import os; print(os.environ.get('TOKEN'))")
 CHATID=$(/usr/bin/env python -c "import os; print(os.environ.get('CHATID'))")
+API_KEY=$(/usr/bin/env python -c "import os; print(os.environ.get('API_KEY'))")
 BOT_MSG_URL="https://api.telegram.org/bot${TOKEN}/sendMessage"
 BOT_BUILD_URL="https://api.telegram.org/bot${TOKEN}/sendDocument"
 # Build Machine details
@@ -44,7 +45,7 @@ objdir="${kernel_dir}/out"
 anykernel=$HOME/anykernel
 builddir="${kernel_dir}/build"
 ZIMAGE=$kernel_dir/out/arch/arm64/boot/Image.gz-dtb
-kernel_name="perf_violet_13-14-dynamic"
+kernel_name="perf_violet_DNK"
 KERVER=$(make kernelversion)
 COMMIT_HEAD=$(git log --oneline -1)
 zip_name="$kernel_name-$(date +"%d%m%Y-%H%M")-signed.zip"
@@ -115,11 +116,9 @@ completion() {
     DIFF=$(($END - $START))
     BUILDTIME=$(echo $((${END} - ${START})) | awk '{print int ($1/3600)" Hours:"int(($1/60)%60)"Minutes:"int($1%60)" Seconds"}')
     file_path="$HOME/$zip_name"
-    url=$(curl --upload-file "$file_path" https://transfer.sh/"$zip_name")
+    url="https://pixeldrain.com/u/$(curl -s -T "$file_path" -u :"$API_KEY" "https://pixeldrain.com/api/file/" | jq -r '.id')"
     zip_size=$(du -h $HOME/$zip_name | awk '{print $1}')
-    tg_post_msg "<b>$kernel_name compiled successfully</b>%0A<b>File Name:</b> <code>$zip_name</code>%0A<b>File Size:</b> <code>$zip_size</code>%0A<b>Download Link:</b> <a href='${url}'>Click Here</a>%0A<b>Build Time: $((DIFF / 60)) minute(s) and $((DIFF % 60)) second(s)</b>"
-    cd $HOME
-    python3 <(curl -s https://gitlab.com/kibria5/kernel_upload/-/raw/main/gh_upload.py)
+    tg_post_msg "<b>File Name:</b> <code>$zip_name</code>%0A<b>File Size:</b> <code>$zip_size</code>%0A<b>Download Link:</b> <a href='${url}'>Click Here</a>%0A<b>Build Time: $((DIFF / 60)) minute(s) and $((DIFF % 60)) second(s)</b>"
     echo
     echo -e ${LGR} "############################################"
     echo -e ${LGR} "############# OkThisIsEpic!  ##############"
