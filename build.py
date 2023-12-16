@@ -68,15 +68,6 @@ if ! [ -d "$TC_DIR" ]; then
         exit 1
     fi
 fi
-
-# Clone KernelSU repository
-if [ ! -d "$kernel_dir/KernelSU" ]; then
-    tg_post_msg "<code>Cloning KernelSU repository</code>"
-    if ! git clone https://github.com/tiann/KernelSU.git -b main $kernel_dir/KernelSU; then
-        exit 1
-    fi
-fi
-
 # Colors
 NC='\\033[0m'
 RED='\\033[0;31m'
