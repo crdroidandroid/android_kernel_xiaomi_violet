@@ -147,7 +147,36 @@ static int append_zeros(struct backing_file_context *bfc, size_t len)
 	if (result != -EOPNOTSUPP)
 		return result;
 
-	return append_zeros_no_fallocate(bfc, file_size, len);
+static int write_to_bf(struct backing_file_context *bfc, const void *buf,
+			size_t count, loff_t pos)
+{
+	ssize_t res = incfs_kwrite(bfc, buf, count, pos);
+
+	if (res < 0)
+		return res;
+	if (res != count)
+		return -EIO;
+	return 0;
+}
+
+static u32 calc_md_crc(struct incfs_md_header *record)
+{
+	u32 result = 0;
+	__le32 saved_crc = record->h_record_crc;
+	__le64 saved_md_offset = record->h_next_md_offset;
+	size_t record_size = min_t(size_t, le16_to_cpu(record->h_record_size),
+				INCFS_MAX_METADATA_RECORD_SIZE);
+
+	/* Zero fields which needs to be excluded from CRC calculation. */
+	record->h_record_crc = 0;
+	record->h_next_md_offset = 0;
+	result = crc32(0, record, record_size);
+
+	/* Restore excluded fields. */
+	record->h_record_crc = saved_crc;
+	record->h_next_md_offset = saved_md_offset;
+
+	return result;
 }
 
 /*
